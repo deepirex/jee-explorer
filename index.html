@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Your College · JEE 2026 Cutoff Explorer</title>
+  <meta name="description" content="Free JEE 2026 college predictor. Enter your rank, state, category and find realistic NIT, IIT, IIIT, GFTI options based on CSAB and JoSAA closing ranks.">
+  <meta property="og:title" content="JEE 2026 Cutoff Explorer · Free College Predictor">
+  <meta property="og:description" content="Enter your rank and category. See realistic NIT, IIT, IIIT, GFTI options based on official CSAB 2025 and JoSAA 2025 closing ranks.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="JEE 2026 Cutoff Explorer · Free College Predictor">
+  <meta name="twitter:description" content="Free, no-signup tool. Find realistic JEE college options across NITs, IITs, IIITs, GFTIs.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface-2: #1a1a1a;
+      --border: #222222;
+      --text: #e5e5e5;
+      --text-muted: #888888;
+      --accent: #3b82f6;
+      --orange: #F97316;
+      --tool-bg: #ffffff;
+      --tool-subtle: #f9fafb;
+      --tool-border: #e5e7eb;
+      --tool-text: #1a1a1a;
+      --tool-secondary: #4b5563;
+      --tool-muted: #9ca3af;
+    }
+    html, body {
+      background: var(--bg);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(8px);
+    }
+    .header-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    }
+    .brand {
+      font-weight: 700; font-size: 16px; letter-spacing: -0.01em;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .brand .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--orange);
+    }
+    .header-meta {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .header-meta a {
+      color: var(--text-muted); text-decoration: none;
+      border-bottom: 1px dashed transparent;
+      transition: all 0.15s;
+    }
+    .header-meta a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ─── HERO ─── */
+    .hero { max-width: 1200px; margin: 0 auto; padding: 56px 24px 32px; }
+    .hero h1 {
+      font-size: 38px; font-weight: 700; letter-spacing: -0.02em;
+      margin-bottom: 12px; line-height: 1.15;
+    }
+    .hero h1 .accent { color: var(--orange); }
+    .hero p.tagline {
+      color: var(--text-muted); font-size: 16px; max-width: 720px;
+    }
+
+    /* ─── INPUT FORM ─── */
+    .form-card {
+      max-width: 1200px; margin: 28px auto 0; padding: 0 24px;
+    }
+    .form-grid {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: 11px; color: var(--text-muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .field input, .field select {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .field input:focus, .field select:focus {
+      outline: none; border-color: var(--accent);
+    }
+    .field input[type="number"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ─── RESULTS ─── */
+    .results-wrap { background: var(--bg); padding: 0 24px 80px; }
+    .results {
+      max-width: 1200px; margin: 28px auto 0;
+      background: var(--tool-bg); color: var(--tool-text);
+      border-radius: 12px; padding: 28px 32px 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+    .results.hidden { display: none; }
+
+    .empty-state {
+      max-width: 1200px; margin: 28px auto 0; padding: 0 24px;
+    }
+    .empty-state-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .empty-state-card h3 { color: var(--text); font-size: 18px; margin-bottom: 6px; }
+
+    .notice {
+      background: #fffbeb; border-left: 4px solid #f59e0b;
+      padding: 12px 16px; margin-bottom: 20px;
+      font-size: 13px; border-radius: 4px;
+    }
+    .notice b { color: #92400e; }
+
+    .stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px; margin-bottom: 18px;
+    }
+    .stat {
+      background: var(--tool-subtle); padding: 12px 16px;
+      border-radius: 8px; border: 1px solid var(--tool-border);
+    }
+    .stat .num {
+      font-size: 24px; font-weight: 700; color: var(--tool-text);
+      font-family: 'JetBrains Mono', monospace; line-height: 1.2;
+    }
+    .stat .label {
+      font-size: 10px; color: var(--tool-muted);
+      text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500;
+      margin-top: 2px;
+    }
+    .stat.safe .num { color: #059669; }
+    .stat.target .num { color: #d97706; }
+    .stat.reach .num { color: #dc2626; }
+
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center;
+      margin-bottom: 12px; padding-bottom: 12px;
+      border-bottom: 1px dashed var(--tool-border);
+    }
+    .controls:last-of-type { border-bottom: none; padding-bottom: 0; }
+    .controls .clabel {
+      font-size: 11px; color: var(--tool-muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .pillgroup { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pill {
+      padding: 5px 12px; border: 1px solid var(--tool-border);
+      border-radius: 999px; background: white; cursor: pointer;
+      font-size: 12px; user-select: none; transition: all 0.15s;
+      font-family: inherit; color: var(--tool-secondary);
+    }
+    .pill:hover { border-color: #9ca3af; color: var(--tool-text); }
+    .pill.active {
+      background: var(--accent); color: white; border-color: var(--accent);
+    }
+    .pill .count { opacity: 0.7; margin-left: 4px; font-size: 10px; }
+    input[type="text"].search {
+      padding: 6px 12px; border: 1px solid var(--tool-border);
+      border-radius: 6px; font-size: 13px; font-family: inherit;
+      background: white; color: var(--tool-text);
+      min-width: 220px;
+    }
+    input[type="text"].search:focus { outline: none; border-color: var(--accent); }
+
+    .source-toggle {
+      display: flex; gap: 4px; background: var(--tool-subtle);
+      padding: 3px; border-radius: 6px;
+    }
+    .source-toggle button {
+      padding: 5px 14px; border: none; background: transparent;
+      cursor: pointer; font-size: 11px; font-weight: 600;
+      color: var(--tool-secondary); border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em;
+    }
+    .source-toggle button.active {
+      background: white; color: var(--tool-text);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+
+    .table-wrap {
+      margin-top: 18px; overflow-x: auto;
+      border: 1px solid var(--tool-border); border-radius: 8px;
+    }
+    table { width: 100%; border-collapse: collapse; background: white; font-size: 13px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #f3f4f6; }
+    th {
+      background: var(--tool-subtle); font-weight: 600;
+      font-size: 10px; color: var(--tool-secondary);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      cursor: pointer; user-select: none; white-space: nowrap;
+    }
+    th:hover { background: #f1f5f9; }
+    th.sort-asc::after { content: " ▲"; color: var(--accent); }
+    th.sort-desc::after { content: " ▼"; color: var(--accent); }
+    tbody tr:hover { background: #fafbfc; }
+    .num { text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .badge.NIT { background: #dbeafe; color: #1e40af; }
+    .badge.IIIT { background: #ede9fe; color: #5b21b6; }
+    .badge.GFTI { background: #f3f4f6; color: #4b5563; }
+    .badge.SPA { background: #fce7f3; color: #9d174d; }
+    .badge.IIT { background: #fed7aa; color: #9a3412; }
+    .badge.source {
+      background: var(--tool-subtle); color: var(--tool-muted);
+      border: 1px solid var(--tool-border);
+    }
+    .safety {
+      display: inline-block; padding: 2px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 600;
+    }
+    .safety.Reach { background: #fee2e2; color: #b91c1c; }
+    .safety.Target { background: #fef3c7; color: #92400e; }
+    .safety.Safe { background: #d1fae5; color: #065f46; }
+    .home-row { background: #fff7ed; }
+    .empty { text-align: center; padding: 40px; color: var(--tool-muted); font-style: italic; }
+
+    .tool-footer {
+      margin-top: 24px; padding-top: 14px;
+      border-top: 1px solid var(--tool-border);
+      font-size: 11px; color: var(--tool-muted);
+      font-family: 'JetBrains Mono', monospace;
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    }
+
+    /* ─── ABOUT / DISCLAIMER ─── */
+    .info {
+      max-width: 1200px; margin: 32px auto; padding: 0 24px;
+    }
+    .info-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .info-card h3 {
+      font-size: 14px; font-weight: 600; color: var(--text);
+      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .info-card p, .info-card li {
+      font-size: 13px; color: var(--text-muted); line-height: 1.6;
+    }
+    .info-card ul { margin-left: 18px; margin-top: 4px; }
+    .info-card li { margin: 4px 0; }
+    .info-card a { color: var(--accent); text-decoration: none; }
+    .info-card a:hover { text-decoration: underline; }
+
+    /* ─── PAGE FOOTER ─── */
+    .page-footer {
+      max-width: 1200px; margin: 0 auto; padding: 32px 24px;
+      border-top: 1px solid var(--border);
+      font-size: 12px; color: var(--text-muted);
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .page-footer a { color: var(--text-muted); text-decoration: none; border-bottom: 1px dashed var(--border); }
+    .page-footer a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    @media (max-width: 720px) {
+      .hero { padding: 32px 16px 16px; }
+      .hero h1 { font-size: 26px; }
+      .form-card, .results-wrap, .info, .page-footer, .empty-state { padding-left: 16px; padding-right: 16px; }
+      .results-wrap { padding-left: 0; padding-right: 0; }
+      .results { padding: 16px; border-radius: 0; margin: 16px; }
+      .form-grid { padding: 16px; }
+      .header-inner { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand"><span class="dot"></span> JEE Cutoff Explorer</div>
+    <div class="header-meta">Free · No signup · <a href="#about">About</a></div>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Find your <span class="accent">JEE 2026</span> college options.</h1>
+  <p class="tagline">Enter your rank and category. We'll show you realistic NIT, IIT, IIIT, and GFTI options based on the latest official CSAB 2025 and JoSAA 2025 closing ranks. No signup, no ads, no data leaves your browser.</p>
+</section>
+
+<section class="form-card">
+  <div class="form-grid">
+    <div class="field">
+      <label for="rank">Your Rank</label>
+      <input type="number" id="rank" placeholder="e.g. 55241" min="1" max="2000000" />
+    </div>
+    <div class="field">
+      <label for="exam">Exam</label>
+      <select id="exam">
+        <option value="Mains">JEE Mains (NIT/IIIT/GFTI)</option>
+        <option value="Advanced">JEE Advanced (IITs)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="state">Home State</label>
+      <select id="state"></select>
+    </div>
+    <div class="field">
+      <label for="category">Category</label>
+      <select id="category">
+        <option value="OPEN">OPEN (General)</option>
+        <option value="OBC-NCL">OBC-NCL</option>
+        <option value="EWS">EWS</option>
+        <option value="SC">SC</option>
+        <option value="ST">ST</option>
+        <option value="OPEN (PwD)">OPEN (PwD)</option>
+        <option value="OBC-NCL (PwD)">OBC-NCL (PwD)</option>
+        <option value="EWS (PwD)">EWS (PwD)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="gender">Gender</label>
+      <select id="gender">
+        <option value="GN">Male / Other (Gender-Neutral seats)</option>
+        <option value="F">Female (Gender-Neutral + Female supernumerary)</option>
+      </select>
+    </div>
+  </div>
+</section>
+
+<div class="empty-state" id="empty-state">
+  <div class="empty-state-card">
+    <h3>Enter your rank above to see options</h3>
+    <p>The tool will fill instantly. Your inputs are saved locally to your browser.</p>
+  </div>
+</div>
+
+<div class="results-wrap">
+  <div class="results hidden" id="results">
+
+    <div class="notice">
+      <b>How to read this:</b> JoSAA is the primary counseling (Round 6 = final). CSAB is the special round that runs after JoSAA, picking up leftover seats — so CSAB cutoffs are usually looser. Check both sources.
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="controls">
+      <span class="clabel">Branch</span>
+      <div class="pillgroup" id="branch-pills"></div>
+    </div>
+    <div class="controls">
+      <span class="clabel">Safety</span>
+      <div class="pillgroup" id="safety-pills"></div>
+      <span class="clabel">Quota</span>
+      <div class="pillgroup" id="quota-pills"></div>
+      <span class="clabel">Type</span>
+      <div class="pillgroup" id="type-pills"></div>
+      <input type="text" id="search" class="search" placeholder="Search institute or program..." />
+      <div class="source-toggle" id="source-toggle">
+        <button class="active" data-source="JoSAA">JoSAA 2025</button>
+        <button data-source="CSAB">CSAB 2025</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="results-table">
+        <thead>
+          <tr>
+            <th data-key="i">Institute</th>
+            <th data-key="t">Type</th>
+            <th data-key="p">Program</th>
+            <th data-key="q">Quota</th>
+            <th data-key="o" class="num">Opening</th>
+            <th data-key="cl" class="num">Closing</th>
+            <th data-key="margin" class="num">Margin</th>
+            <th data-key="safety">Safety</th>
+            <th data-key="s">Src</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="tool-footer">
+      <span>Showing <span id="row-count">0</span> options · Click columns to sort</span>
+      <span>Highlighted rows = Home State seats</span>
+    </div>
+  </div>
+</div>
+
+<section class="info" id="about">
+  <div class="info-grid">
+    <div class="info-card">
+      <h3>What this is</h3>
+      <p>A free college predictor for JEE 2026 aspirants. Built from publicly available CSAB 2025 and JoSAA 2025 closing rank data covering 23 IITs, 31 NITs, 26 IIITs, and 41 GFTIs.</p>
+      <p style="margin-top:6px;">Not affiliated with NTA, JoSAA, CSAB, or any institute.</p>
+    </div>
+    <div class="info-card">
+      <h3>How "Reach / Target / Safe" works</h3>
+      <ul>
+        <li><b>Safe</b> — closing rank is ≥10,000 above yours</li>
+        <li><b>Target</b> — margin is 2,000–10,000</li>
+        <li><b>Reach</b> — margin under 2,000 (risky, may close)</li>
+      </ul>
+      <p style="margin-top:8px;">Build a balanced choice list: 4–5 Safe, 3–4 Target, 2–3 Reach in preference order.</p>
+    </div>
+    <div class="info-card">
+      <h3>Important disclaimer</h3>
+      <p>2025 cutoffs are the best signal we have for 2026, but not a guarantee. Cutoffs shift year-over-year based on the candidate pool, seat changes, and new institutes.</p>
+      <p style="margin-top:6px;">Verify final cutoffs on official sources before locking choices: <a href="https://josaa.nic.in" target="_blank" rel="noopener">josaa.nic.in</a>, <a href="https://csab.nic.in" target="_blank" rel="noopener">csab.nic.in</a>.</p>
+    </div>
+    <div class="info-card">
+      <h3>What's not covered</h3>
+      <p>State-level counseling (JAC Delhi for DTU/NSUT, MHT-CET for Maharashtra, KCET for Karnataka, etc.) and private institutes (BITS, VIT, Manipal, Thapar). Use those institutes' own admission processes.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="page-footer">
+  <span>Made with care · Data: <a href="https://josaa.nic.in" target="_blank" rel="noopener">JoSAA 2025</a> &amp; <a href="https://csab.nic.in" target="_blank" rel="noopener">CSAB 2025</a> closing ranks</span>
+  <span>Free for students · No tracking · No data collection</span>
+</footer>
+
+<script>
+const STORAGE_KEY = 'jee-explorer-prefs-v1';
+
+const PRIORITY = ['Computer Science / IT', 'Electronics / Electrical', 'AI / ML / Data Science', 'Aerospace'];
+
+let DATA = null;
+const state = {
+  // user inputs
+  rank: null,
+  exam: 'Mains',  // 'Mains' | 'Advanced'
+  homeState: '',
+  category: 'OPEN',
+  gender: 'GN',
+  // filters
+  source: 'JoSAA',
+  branch: 'All', safety: 'All', quota: 'All', type: 'All',
+  search: '',
+  sortKey: 'cl', sortDir: 'asc',
+};
+
+function safetyOf(margin) {
+  if (margin == null || isNaN(margin)) return 'Unknown';
+  if (margin < 0) return 'Out of reach';
+  if (margin < 2000) return 'Reach';
+  if (margin < 10000) return 'Target';
+  return 'Safe';
+}
+
+function quotaLabel(code, instState, userState) {
+  if (code === 'AI') return 'All India';
+  if (code === 'HS') return userState === instState ? 'Home State' : 'HS (other state)';
+  if (code === 'OS') return 'Other State';
+  if (code === 'GO') return 'Goa Home State';
+  if (code === 'JK') return 'J&K Home State';
+  if (code === 'LA') return 'Ladakh Home State';
+  if (code === 'DASA-CIWG' || code === 'DASA-Non CIWG') return 'DASA';
+  return code;
+}
+
+function buildOptions(rs) {
+  // Apply user inputs (rank, exam, state, category, gender) and compute margin/safety
+  if (state.rank == null) return [];
+  return rs
+    .filter(r => {
+      // Exam path: Mains => non-IIT (rb=Mains), Advanced => IIT (rb=Advanced)
+      if (state.exam === 'Mains' && r.rb !== 'Mains') return false;
+      if (state.exam === 'Advanced' && r.rb !== 'Advanced') return false;
+      // Category
+      if (r.st !== state.category) return false;
+      // Gender (Female-only seats are supernumerary, GN students don't get them)
+      if (state.gender === 'GN' && r.g !== 'GN') return false;
+      if (state.gender === 'F' && !(r.g === 'GN' || r.g === 'F')) return false;
+      // Home/Other state quota filtering — depends on user state
+      if (r.q === 'HS') {
+        if (!state.homeState) return false;
+        if (r.is !== state.homeState) return false;
+      } else if (r.q === 'OS') {
+        if (state.homeState && r.is === state.homeState) return false;
+      } else if (r.q === 'GO') {
+        if (state.homeState !== 'Goa') return false;
+      } else if (r.q === 'JK') {
+        if (state.homeState !== 'Jammu & Kashmir') return false;
+      } else if (r.q === 'LA') {
+        if (state.homeState !== 'Ladakh') return false;
+      } else if (r.q === 'DASA-CIWG' || r.q === 'DASA-Non CIWG') {
+        return false; // DASA is for foreign nationals/PIO/OCI, skip in main view
+      }
+      return true;
+    })
+    .map(r => {
+      const margin = r.cl - state.rank;
+      return Object.assign({}, r, {
+        margin,
+        safety: safetyOf(margin),
+        reachable: margin >= 0,
+        quotaLabel: quotaLabel(r.q, r.is, state.homeState),
+      });
+    });
+}
+
+function makePills(containerId, options, stateKey, counts) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  options.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'pill' + (state[stateKey] === opt ? ' active' : '');
+    const cnt = counts ? counts[opt] : null;
+    b.innerHTML = opt + (cnt != null ? ' <span class="count">' + cnt + '</span>' : '');
+    b.onclick = () => { state[stateKey] = opt; render(); };
+    c.appendChild(b);
+  });
+}
+
+function applyFilters(rs) {
+  return rs.filter(r => {
+    if (state.branch !== 'All' && r.c !== state.branch) return false;
+    if (state.safety !== 'All' && r.safety !== state.safety) return false;
+    if (state.quota !== 'All' && r.quotaLabel !== state.quota) return false;
+    if (state.type !== 'All' && r.t !== state.type) return false;
+    if (state.search) {
+      const q = state.search.toLowerCase();
+      if (!r.if.toLowerCase().includes(q) && !r.p.toLowerCase().includes(q)) return false;
+    }
+    if (state.exam === 'Mains' && state.source && r.s !== state.source) return false;
+    return true;
+  });
+}
+
+function render() {
+  if (!DATA) return;
+
+  const hasInputs = state.rank != null && state.rank > 0;
+  document.getElementById('empty-state').style.display = hasInputs ? 'none' : '';
+  document.getElementById('results').classList.toggle('hidden', !hasInputs);
+  if (!hasInputs) return;
+
+  // For Advanced exam, hide source toggle (only JoSAA has IIT data)
+  document.getElementById('source-toggle').style.display = state.exam === 'Mains' ? '' : 'none';
+
+  // Compute base options (after user inputs)
+  const baseOptions = buildOptions(DATA.rows);
+  // Only show reachable
+  const reachable = baseOptions.filter(r => r.reachable);
+
+  // Counts for pills
+  const branchCounts = { All: reachable.length };
+  reachable.forEach(r => branchCounts[r.c] = (branchCounts[r.c] || 0) + 1);
+  const allCats = Array.from(new Set(reachable.map(r => r.c)));
+  const orderedCats = ['All', ...PRIORITY.filter(c => allCats.includes(c)), ...allCats.filter(c => !PRIORITY.includes(c)).sort()];
+  makePills('branch-pills', orderedCats, 'branch', branchCounts);
+
+  const branchScoped = reachable.filter(r => state.branch === 'All' || r.c === state.branch);
+  const safetyCounts = { All: branchScoped.length };
+  branchScoped.forEach(r => safetyCounts[r.safety] = (safetyCounts[r.safety] || 0) + 1);
+  makePills('safety-pills', ['All', 'Safe', 'Target', 'Reach'], 'safety', safetyCounts);
+
+  const quotaCounts = { All: branchScoped.length };
+  branchScoped.forEach(r => quotaCounts[r.quotaLabel] = (quotaCounts[r.quotaLabel] || 0) + 1);
+  makePills('quota-pills', ['All', ...Object.keys(quotaCounts).filter(k => k !== 'All').sort()], 'quota', quotaCounts);
+
+  const typeCounts = { All: branchScoped.length };
+  branchScoped.forEach(r => typeCounts[r.t] = (typeCounts[r.t] || 0) + 1);
+  makePills('type-pills', ['All', ...Object.keys(typeCounts).filter(k => k !== 'All').sort()], 'type', typeCounts);
+
+  // Apply pill filters
+  let rows = applyFilters(reachable);
+  rows.sort((a,b) => {
+    const k = state.sortKey;
+    let av = a[k], bv = b[k];
+    if (av == null) av = state.sortDir === 'asc' ? Infinity : -Infinity;
+    if (bv == null) bv = state.sortDir === 'asc' ? Infinity : -Infinity;
+    if (typeof av === 'string') { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+    if (av < bv) return state.sortDir === 'asc' ? -1 : 1;
+    if (av > bv) return state.sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Stats
+  const safe = rows.filter(r => r.safety === 'Safe').length;
+  const tgt = rows.filter(r => r.safety === 'Target').length;
+  const rch = rows.filter(r => r.safety === 'Reach').length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="num">${rows.length}</div><div class="label">Matching</div></div>
+    <div class="stat safe"><div class="num">${safe}</div><div class="label">Safe (>10k margin)</div></div>
+    <div class="stat target"><div class="num">${tgt}</div><div class="label">Target (2k-10k)</div></div>
+    <div class="stat reach"><div class="num">${rch}</div><div class="label">Reach (under 2k)</div></div>
+  `;
+
+  // Table
+  const tb = document.getElementById('tbody');
+  if (rows.length === 0) {
+    tb.innerHTML = '<tr><td class="empty" colspan="9">No options match these filters. Try widening your selections.</td></tr>';
+  } else {
+    tb.innerHTML = rows.map(r => {
+      const margin = r.margin >= 0 ? '+' + r.margin.toLocaleString() : r.margin.toLocaleString();
+      const homeRow = (r.q === 'HS' && r.is === state.homeState) ? 'home-row' : '';
+      return `<tr class="${homeRow}">
+        <td><b>${r.i}</b><div style="font-size:10px;color:#9ca3af;margin-top:2px;">${r.is}</div></td>
+        <td><span class="badge ${r.t}">${r.t}</span></td>
+        <td>${r.p}</td>
+        <td>${r.quotaLabel}</td>
+        <td class="num">${r.o.toLocaleString()}</td>
+        <td class="num">${r.cl.toLocaleString()}</td>
+        <td class="num">${margin}</td>
+        <td><span class="safety ${r.safety}">${r.safety}</span></td>
+        <td><span class="badge source">${r.s}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('row-count').textContent = rows.length;
+
+  // Sort indicators
+  document.querySelectorAll('th').forEach(th => {
+    th.classList.remove('sort-asc','sort-desc');
+    if (th.dataset.key === state.sortKey) th.classList.add(state.sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+  });
+
+  // Source toggle active state
+  document.querySelectorAll('#source-toggle button').forEach(b => {
+    b.classList.toggle('active', b.dataset.source === state.source);
+  });
+
+  saveState();
+}
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if (saved.rank) state.rank = saved.rank;
+    if (saved.exam) state.exam = saved.exam;
+    if (saved.homeState) state.homeState = saved.homeState;
+    if (saved.category) state.category = saved.category;
+    if (saved.gender) state.gender = saved.gender;
+  } catch (e) {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      rank: state.rank, exam: state.exam, homeState: state.homeState,
+      category: state.category, gender: state.gender,
+    }));
+  } catch (e) {}
+}
+
+function populateStateOptions(states) {
+  const sel = document.getElementById('state');
+  sel.innerHTML = '<option value="">— Select —</option>' +
+    states.map(s => `<option value="${s}">${s}</option>`).join('');
+  if (state.homeState) sel.value = state.homeState;
+}
+
+function wireInputs() {
+  const rankEl = document.getElementById('rank');
+  const examEl = document.getElementById('exam');
+  const stateEl = document.getElementById('state');
+  const catEl = document.getElementById('category');
+  const genEl = document.getElementById('gender');
+
+  if (state.rank) rankEl.value = state.rank;
+  examEl.value = state.exam;
+  catEl.value = state.category;
+  genEl.value = state.gender;
+
+  rankEl.addEventListener('input', e => {
+    const v = parseInt(e.target.value);
+    state.rank = isNaN(v) || v <= 0 ? null : v;
+    render();
+  });
+  examEl.addEventListener('change', e => { state.exam = e.target.value; render(); });
+  stateEl.addEventListener('change', e => { state.homeState = e.target.value; render(); });
+  catEl.addEventListener('change', e => { state.category = e.target.value; render(); });
+  genEl.addEventListener('change', e => { state.gender = e.target.value; render(); });
+
+  document.getElementById('search').addEventListener('input', e => {
+    state.search = e.target.value; render();
+  });
+  document.querySelectorAll('th').forEach(th => {
+    th.addEventListener('click', () => {
+      const k = th.dataset.key;
+      if (state.sortKey === k) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+      else { state.sortKey = k; state.sortDir = 'asc'; }
+      render();
+    });
+  });
+  document.querySelectorAll('#source-toggle button').forEach(b => {
+    b.addEventListener('click', () => {
+      state.source = b.dataset.source;
+      state.branch = 'All'; state.safety = 'All'; state.quota = 'All'; state.type = 'All';
+      render();
+    });
+  });
+}
+
+async function init() {
+  loadState();
+  try {
+    const res = await fetch('data.json');
+    DATA = await res.json();
+  } catch (e) {
+    document.getElementById('empty-state').innerHTML =
+      '<div class="empty-state-card"><h3>Failed to load data</h3><p>Please refresh the page. If the problem persists, the dataset file may be missing.</p></div>';
+    return;
+  }
+  populateStateOptions(DATA.states);
+  wireInputs();
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
