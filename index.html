@@ -244,6 +244,16 @@
       background: var(--tool-subtle); color: var(--tool-muted);
       border: 1px solid var(--tool-border);
     }
+    .nirf-rank {
+      display: inline-block; min-width: 28px; padding: 2px 8px;
+      border-radius: 4px; font-size: 11px; font-weight: 700;
+      font-family: 'JetBrains Mono', monospace; text-align: center;
+    }
+    .nirf-Top25     { background: rgba(16,185,129,0.18); color: #34d399; }
+    .nirf-Top50     { background: rgba(59,130,246,0.18); color: #60a5fa; }
+    .nirf-Top100    { background: rgba(148,163,184,0.18); color: #cbd5e1; }
+    .nirf-Unranked  { background: transparent; color: var(--tool-muted); font-weight: 400; }
+
     .safety {
       display: inline-block; padding: 2px 10px; border-radius: 999px;
       font-size: 11px; font-weight: 600;
@@ -388,6 +398,8 @@
     <div class="controls">
       <span class="clabel">Safety</span>
       <div class="pillgroup" id="safety-pills"></div>
+      <span class="clabel">NIRF</span>
+      <div class="pillgroup" id="nirf-pills"></div>
       <span class="clabel">Quota</span>
       <div class="pillgroup" id="quota-pills"></div>
       <span class="clabel">Type</span>
@@ -404,6 +416,7 @@
         <thead>
           <tr>
             <th data-key="i">Institute</th>
+            <th data-key="nirfRank" class="num" title="NIRF Engineering 2025 rank (top 100 only)">NIRF</th>
             <th data-key="t">Type</th>
             <th data-key="p">Program</th>
             <th data-key="q">Quota</th>
@@ -442,6 +455,11 @@
       <p style="margin-top:8px;">Build a balanced choice list: 4–5 Safe, 3–4 Target, 2–3 Reach in preference order.</p>
     </div>
     <div class="info-card">
+      <h3>NIRF column</h3>
+      <p>Each row shows the institute's <b>NIRF Engineering 2025</b> rank where available (top 100 only). Use it to weigh a high-demand branch at a lower-ranked institute against a less-competitive branch at a higher-ranked one. Filter by tier (Top 25 / 50 / 100) to narrow the shortlist.</p>
+      <p style="margin-top:6px;">"—" means the institute isn't in the NIRF top 100. Many newer NITs, IIITs, and GFTIs sit in the 101–200 band and aren't individually ranked by NIRF. Source: <a href="https://www.nirfindia.org/Rankings/2025/EngineeringRanking.html" target="_blank" rel="noopener">nirfindia.org</a>.</p>
+    </div>
+    <div class="info-card">
       <h3>Important disclaimer</h3>
       <p>2025 cutoffs (JoSAA final round + CSAB Special Round) are the best signal we have for 2026, but not a guarantee. Cutoffs shift year-over-year based on the candidate pool, seat matrix changes, and new institutes. Earlier JoSAA rounds (1–5) are not included since Round 6 is the final closing rank.</p>
       <p style="margin-top:6px;">Verify final cutoffs on official sources before locking choices: <a href="https://josaa.nic.in" target="_blank" rel="noopener">josaa.nic.in</a>, <a href="https://csab.nic.in" target="_blank" rel="noopener">csab.nic.in</a>.</p>
@@ -464,6 +482,7 @@ const STORAGE_KEY = 'jee-explorer-prefs-v1';
 const PRIORITY = ['Computer Science / IT', 'Electronics / Electrical', 'AI / ML / Data Science', 'Aerospace'];
 
 let DATA = null;
+let NIRF = {};
 const state = {
   // user inputs
   rank: null,
@@ -473,10 +492,17 @@ const state = {
   gender: 'GN',
   // filters
   source: 'JoSAA',
-  branch: 'All', safety: 'All', quota: 'All', type: 'All',
+  branch: 'All', safety: 'All', quota: 'All', type: 'All', nirf: 'All',
   search: '',
   sortKey: 'cl', sortDir: 'asc',
 };
+
+function nirfTier(rank) {
+  if (rank == null) return 'Unranked';
+  if (rank <= 25) return 'Top 25';
+  if (rank <= 50) return 'Top 50';
+  return 'Top 100';
+}
 
 function safetyOf(margin) {
   if (margin == null || isNaN(margin)) return 'Unknown';
@@ -529,13 +555,26 @@ function buildOptions(rs) {
     })
     .map(r => {
       const margin = r.cl - state.rank;
+      const nirf = NIRF[r.i];
+      const nirfRank = nirf ? nirf.rank : null;
       return Object.assign({}, r, {
         margin,
         safety: safetyOf(margin),
         reachable: margin >= 0,
         quotaLabel: quotaLabel(r.q, r.is, state.homeState),
+        nirfRank,
+        nirfTier: nirfTier(nirfRank),
       });
     });
+}
+
+function nirfMatch(r, sel) {
+  if (sel === 'All') return true;
+  if (sel === 'Unranked') return r.nirfRank == null;
+  if (sel === 'Top 25')   return r.nirfRank != null && r.nirfRank <= 25;
+  if (sel === 'Top 50')   return r.nirfRank != null && r.nirfRank <= 50;
+  if (sel === 'Top 100')  return r.nirfRank != null && r.nirfRank <= 100;
+  return true;
 }
 
 function makePills(containerId, options, stateKey, counts) {
@@ -557,6 +596,7 @@ function applyFilters(rs) {
     if (state.safety !== 'All' && r.safety !== state.safety) return false;
     if (state.quota !== 'All' && r.quotaLabel !== state.quota) return false;
     if (state.type !== 'All' && r.t !== state.type) return false;
+    if (!nirfMatch(r, state.nirf)) return false;
     if (state.search) {
       const q = state.search.toLowerCase();
       if (!r.if.toLowerCase().includes(q) && !r.p.toLowerCase().includes(q)) return false;
@@ -594,6 +634,12 @@ function render() {
   branchScoped.forEach(r => safetyCounts[r.safety] = (safetyCounts[r.safety] || 0) + 1);
   makePills('safety-pills', ['All', 'Safe', 'Target', 'Reach'], 'safety', safetyCounts);
 
+  const nirfCounts = { All: branchScoped.length };
+  ['Top 25', 'Top 50', 'Top 100', 'Unranked'].forEach(t => {
+    nirfCounts[t] = branchScoped.filter(r => nirfMatch(r, t)).length;
+  });
+  makePills('nirf-pills', ['All', 'Top 25', 'Top 50', 'Top 100', 'Unranked'], 'nirf', nirfCounts);
+
   const quotaCounts = { All: branchScoped.length };
   branchScoped.forEach(r => quotaCounts[r.quotaLabel] = (quotaCounts[r.quotaLabel] || 0) + 1);
   makePills('quota-pills', ['All', ...Object.keys(quotaCounts).filter(k => k !== 'All').sort()], 'quota', quotaCounts);
@@ -629,13 +675,17 @@ function render() {
   // Table
   const tb = document.getElementById('tbody');
   if (rows.length === 0) {
-    tb.innerHTML = '<tr><td class="empty" colspan="9">No options match these filters. Try widening your selections.</td></tr>';
+    tb.innerHTML = '<tr><td class="empty" colspan="10">No options match these filters. Try widening your selections.</td></tr>';
   } else {
     tb.innerHTML = rows.map(r => {
       const margin = r.margin >= 0 ? '+' + r.margin.toLocaleString() : r.margin.toLocaleString();
       const homeRow = (r.q === 'HS' && r.is === state.homeState) ? 'home-row' : '';
+      const nirfCell = r.nirfRank != null
+        ? `<span class="nirf-rank nirf-${r.nirfTier.replace(' ','')}" title="NIRF Engineering 2025 rank">${r.nirfRank}</span>`
+        : `<span class="nirf-rank nirf-Unranked" title="Not in NIRF Engineering 2025 top 100">—</span>`;
       return `<tr class="${homeRow}">
         <td><b>${r.i}</b><div style="font-size:10px;color:#9ca3af;margin-top:2px;">${r.is}</div></td>
+        <td class="num">${nirfCell}</td>
         <td><span class="badge ${r.t}">${r.t}</span></td>
         <td>${r.p}</td>
         <td>${r.quotaLabel}</td>
@@ -727,7 +777,7 @@ function wireInputs() {
   document.querySelectorAll('#source-toggle button').forEach(b => {
     b.addEventListener('click', () => {
       state.source = b.dataset.source;
-      state.branch = 'All'; state.safety = 'All'; state.quota = 'All'; state.type = 'All';
+      state.branch = 'All'; state.safety = 'All'; state.quota = 'All'; state.type = 'All'; state.nirf = 'All';
       render();
     });
   });
@@ -736,8 +786,12 @@ function wireInputs() {
 async function init() {
   loadState();
   try {
-    const res = await fetch('data.json');
-    DATA = await res.json();
+    const [dataRes, nirfRes] = await Promise.all([
+      fetch('data.json'),
+      fetch('nirf.json'),
+    ]);
+    DATA = await dataRes.json();
+    NIRF = nirfRes.ok ? await nirfRes.json() : {};
   } catch (e) {
     document.getElementById('empty-state').innerHTML =
       '<div class="empty-state-card"><h3>Failed to load data</h3><p>Please refresh the page. If the problem persists, the dataset file may be missing.</p></div>';
